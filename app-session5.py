@@ -1,3 +1,7 @@
+"""
+May 2, 2024
+"""
+
 from flask import Flask, request
 from typing import List
 
@@ -49,7 +53,8 @@ def add_student():
 
 @app.route("/api/multi-students", methods=["POST"])
 def add_multi_students():
-    """"""
+    """
+    """
     for student in request.get_json():
         name = student.get("name")
         age = student["age"]
@@ -58,11 +63,33 @@ def add_multi_students():
         data.append(new_student)
     return {"success": True, "saved_student": get_formated_students(data), "status_code": 201}
 
+#introducing path variable into the url
+@app.route("/api/students/<int:id>", methods=["GET"])
+def get_student_by_id(id):
+    print(f"Path Variable: {id}")
+    for student in data:
+        if student.id == id:
+            return {"success": True, "students": student.to_dict(), "status_code": 200}
+    return {"success": False, "msg": "Bad data", "desc": f"Student with id: {id} doesnot exist"}
+
+@app.route("/api/students/<int:id>", methods=["DELETE"])
+def del_student_by_id(id):
+    print(id)
+    for i, student in enumerate(data):
+        if student.id == id:
+            del data[i]
+            return {"success": True, "deleted_student_id": id, "status_code": 200}
+    return {"success": False, "msg": "Bad data", "desc": f"Student with id: {id} doesnot exist"}
+
+@app.route("/api/students/<int:id>", methods=["UPDATE"])
+def update_student_by_id(id):
+    # // TODO: Update the remaining functionality
+    pass
 
 #backend data guy
 @app.route("/", methods=["GET"])
 def index():
-    return get_info()
+    return get_info() # // FIXME: Dummy fix
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5001, debug=True)
