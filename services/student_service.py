@@ -1,25 +1,37 @@
 import psycopg2
+import os
 
+from dotenv import load_dotenv
+
+load_dotenv() #searches for .env in the repo. Exports k:v pairs.
 
 def get_conn():
     return psycopg2.connect(
-        database="data-engineering", 
-        user="postgres", 
-        password="Gautham@123", 
-        host="localhost"
+        database= os.getenv("DB_NAME"), 
+        user= os.getenv("DB_USR_NAME"), 
+        password= os.getenv("DB_PWD"),
+        host= os.getenv("DB_HOST")
     )
 
-
-
 def save_student(name: str, age: int, is_active: bool = True):
-    return None
-    # sql = f"INSERT INTO students(name, age, is_active) VALUES(?, ?, ?)"
-    # print(sql)
-    # with Connection(students_db_file) as c:
-    #     c.execute(sql, (name, age, is_active))
-    #     # saved_id = c.lastrowid()
-    #     # print(saved_id)
-    #     c.commit()
+    sql = f"INSERT INTO test.students(name, age, is_active) VALUES(%(name)s, %(age)s, %(is_active)s)"
+
+    try:
+        conn = get_conn()    
+
+        with conn.cursor() as c:
+            try:
+                c.execute(sql, {"name": name, "age": age, "is_active": is_active})
+                saved_id = c.lastrowid
+                print(saved_id)
+            except Exception as e:
+                print(e)
+        
+        conn.commit()
+    except Exception as e:
+        print(f"Couldn't insert the record: {e}")
+
+
 
 def fetch_all_students(n: int = 10):
     sql = f"SELECT * FROM test.students LIMIT {n}"
@@ -28,31 +40,36 @@ def fetch_all_students(n: int = 10):
         return c.fetchall()
 
 def fetch_student_by_id(id):
-    return None
-    # sql = "SELECT * FROM students where id = ?"
-    # with Connection(students_db_file) as c:
-    #     return c.execute(sql, (id,)).fetchone()
+    # return None
+    sql = "SELECT * FROM test.students where id = %(id)s"
+    with get_conn().cursor() as c:
+        c.execute(sql, {"id":id})
+        return c.fetchone()
+
     
 def delete_student_by_id(id):
-    return None
-    # sql = "DELETE FROM students where id = ?"
-    # try:
-    #     with Connection(students_db_file) as c:
-    #         c.execute(sql, (id,))
-    #         c.commit()
-    #         return True
-    # except Exception as e:
-    #     print(e)
-    # return False
+
+    sql = "DELETE FROM test.students where id = %(id)s"
+    try:
+        conn = get_conn()
+        with conn.cursor() as c:
+            c.execute(sql, {"id":id})
+        conn.commit()
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
 
 def update_student_by_id(id: int, name: str, age: int, is_active: bool = True):
-    return None
-    # sql = "UPDATE students SET name = ?, age = ?, is_active =? where id = ?"
-    # try:
-    #     with Connection(students_db_file) as c:
-    #         c.execute(sql, (name, age, is_active, id))
-    #         c.commit()
-    #         return True
-    # except Exception as e:
-    #     print(e)
-    # return False
+    # return None
+    sql = "UPDATE test.students SET name = %(name)s, age = %(age)s, is_active = %(is_active)s where id = %(id)s"
+    try:
+        conn = get_conn()
+        with conn.cursor() as c:
+            c.execute(sql, {"name":name, "age": age, "is_active": is_active, "id":id})
+        conn.commit()
+        return True
+    except Exception as e:
+        print(e)
+        return False

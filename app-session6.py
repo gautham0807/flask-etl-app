@@ -69,7 +69,7 @@ def del_student_by_id(id):
         return {"success": True, "deleted_student_id": f"{student_in_db[0]} is Deleted", "status_code": 200}
     return {"success": False, "msg": "Bad data", "desc": f"Student with id: {id} does not exist"}
 
-@app.route("/api/students/<int:id>", methods=["PATCH"])
+@app.route("/api/students/<int:id>", methods=["PUT"])
 def update_student_by_id(id):
     print(id)
     student_in_db = student_service.fetch_student_by_id(id)
